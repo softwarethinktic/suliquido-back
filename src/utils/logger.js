@@ -33,7 +33,7 @@ const devLogger = () => {
     format: combine(
     //   colorize(),
       timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
-      errors({ stack: true }),
+      errors({ stack: true, stackTrace: true, message: true, }),
       myFormat
     ),
     transports: [new transports.Console(), new transports.File({ filename: "file.log" })],

@@ -1,7 +1,9 @@
-const bcrypt = require("bcryptjs");
+// const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { User } = require("../models");
-const { logger } = require("./utils/logger");
+const bcrypt = require("bcryptjs");
+const { logger } = require("../utils/logger");
+const { Op } = require("sequelize");
 
 const authController = {
   async register(req, res) {
@@ -14,6 +16,7 @@ const authController = {
           [Op.or]: [{ email }, { documentNumber }],
         },
       });
+
       if (existingUser) {
         return res.status(400).json({
           ok: false,
@@ -66,7 +69,7 @@ const authController = {
       if (!user) {
         return res.status(400).json({
           ok: false,
-          msg: "Este email no está registrado",
+          msg: "Este documento no está registrado",
         });
       }
 

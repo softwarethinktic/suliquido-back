@@ -1,11 +1,10 @@
 const express = require("express");
 const router = express.Router();
-// const authController = require("../controllers/authController");
+const authController = require("../controllers/authController");
+const { validateRegister, validateLogin } = require("../middlewares/validateFields");
 
-router.post("/register", [], (req, res) => {
-  res.json({ message: "Register" });
-});
-router.post("/login");
+router.post("/register", validateRegister, authController.register);
+router.post("/login",validateLogin ,authController.login);
 router.post("/renew");
 router.post("/forgot-password");
 router.post("/reset-password");

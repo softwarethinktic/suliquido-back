@@ -1,43 +1,32 @@
-const mongoose = require("mongoose");
-const { Schema } = mongoose;
+const { Sequelize } = require("sequelize");
+const config = require("../config/database");
 
-const DescuentosSchema = new Schema({
-  otroDescuento: { type: Number, required: true },
-  ICA: { type: Number, required: true },
-  CREE: { type: Number, required: true },
-  Faltantes: { type: Number, required: true },
-  Prestamos: { type: Number, required: true },
-});
+const sequelize = new Sequelize(
+  config.database,
+  config.username,
+  config.password,
+  config
+);
 
-const VehiculoSchema = new Schema({
-  tipo: { type: String, required: true },
-  placa: { type: String, required: true },
-});
+const User = require("./User")(sequelize);
+const Manifiesto = require("./Manifiesto")(sequelize);
+const Vehiculo = require("./Vehiculo")(sequelize);
+const Propietario = require("./Propietario")(sequelize);
 
-const ProductoSchema = new Schema({
-  cantidad: { type: Number, required: true },
-  nombreProducto: { type: String, required: true },
-});
 
-const ManifiestoSchema = new Schema({
-  NumeroManifiesto: { type: String, unique: true, required: true },
-  Fecha: { type: Date, required: true },
-  Estado: {
-    type: String,
-    enum: ["Liquidada", "Anulada", "Cumplida"],
-    required: true,
-  },
-  Ruta: { type: String, required: true },
-  vehiculo: { type: VehiculoSchema, required: true },
-  producto: { type: ProductoSchema, required: true },
-  valorTons: { type: Number, required: true },
-  valorFlete: { type: Number, required: true },
-  Anticipos: { type: Number, required: true },
-  ReteFte: { type: Number, required: true },
-  Descuentos: { type: DescuentosSchema, required: true },
-  Saldo: { type: Number, required: true },
-});
+Propietario.hasMany(Manifiesto, { foreignKey: 'propietarioId', as: 'manifiestos' });
+Vehiculo.hasMany(Manifiesto, { foreignKey: 'vehiculoId', as: 'manifiestos' });
+Manifiesto.belongsTo(Propietario, { foreignKey: 'propietarioId', as: 'propietario' });
+Manifiesto.belongsTo(Vehiculo, { foreignKey: 'vehiculoId', as: 'vehiculo' });
+Propietario.hasMany(Vehiculo, { foreignKey: 'propietarioId', as: 'vehiculos' });
+Vehiculo.belongsTo(Propietario, { foreignKey: 'propietarioId', as: 'propietario' });
+Propietario.hasOne(User, { foreignKey: 'propietarioId', as: 'user' });
+User.belongsTo(Propietario, { foreignKey: 'propietarioId', as: 'propietario' });
 
-const Manifiesto = mongoose.model("Manifiesto", ManifiestoSchema);
-
-module.exports = Manifiesto;
+module.exports = {
+  User,
+  Manifiesto,
+  Vehiculo,
+  Propietario,
+  sequelize
+};
