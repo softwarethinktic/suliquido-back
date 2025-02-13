@@ -5,8 +5,8 @@ const { validateRegister, validateLogin } = require("../middlewares/validateFiel
 
 router.post("/register", validateRegister, authController.register);
 router.post("/login",validateLogin ,authController.login);
-router.post("/renew");
-router.post("/forgot-password");
-router.post("/reset-password");
+// router.post("/renew");
+// router.post("/forgot-password");
+// router.post("/reset-password");
 
 module.exports = router;

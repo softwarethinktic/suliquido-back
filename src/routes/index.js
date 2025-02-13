@@ -4,8 +4,8 @@ const authRoutes = require("./authRoutes");
 const manifiestoRoutes = require("./manifiestoRoutes");
 
 function setRoutes(app) {
-  app.use("/api/v1/auth", authLimiter, authRoutes);
-  app.use("/api/v1/manifiesto", [ generalLimiter, validateApiToken], manifiestoRoutes);
+  app.use("/auth", authLimiter, authRoutes);
+  app.use("/manifiesto", [ generalLimiter, validateApiToken], manifiestoRoutes);
 
   // Add more routes as needed
 }
