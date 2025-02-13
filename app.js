@@ -5,9 +5,9 @@ const fs = require("fs");
 const path = require("path");
 const cors = require("cors");
 
-const dbConnection = require("./config/connectionDb");
-const { setRoutes } = require("./routes");
-const { logger } = require("./utils/logger");
+const dbConnection = require("./src/config/connectionDb");
+const { setRoutes } = require("./src/routes");
+const { logger } = require("./src/utils/logger");
 
 const app = express();
 
