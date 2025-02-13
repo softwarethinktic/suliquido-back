@@ -1,7 +1,7 @@
 const { response } = require("express");
 const jwt = require("jsonwebtoken");
 const { User } = require("../models");
-const {logger} = require("../utils/logger");
+const { logger } = require("../utils/logger");
 
 const validateJWT = async (req, res = response, next) => {
   // x-token headers
@@ -31,8 +31,28 @@ const validateJWT = async (req, res = response, next) => {
     req.name = user.name;
     req.role = user.role;
   } catch (error) {
-
     logger.error(error);
+    return res.status(401).json({
+      ok: false,
+      msg: "Token no válido",
+    });
+  }
+
+  next();
+};
+
+const validateApiToken = (req, res = response, next) => {
+  // x-token headers
+  const token = req?.header("x-token");
+
+  if (!token) {
+    return res.status(401).json({
+      ok: false,
+      msg: "No hay token en la petición",
+    });
+  }
+
+  if (token !== process.env.API_KEY) {
     return res.status(401).json({
       ok: false,
       msg: "Token no válido",
@@ -44,4 +64,5 @@ const validateJWT = async (req, res = response, next) => {
 
 module.exports = {
   validateJWT,
+  validateApiToken,
 };
