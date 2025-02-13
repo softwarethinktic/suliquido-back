@@ -14,8 +14,8 @@ jobs:
     - name: FTP-Deploy-Action
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
-        ftp-server: ${{ secrets.FTP_SERVER }}
-        ftp-username: ${{ secrets.FTP_USERNAME }}
-        ftp-password: ${{ secrets.FTP_PASSWORD }}
+        server: ${{ secretsSERVER }}
+        username: ${{ secretsUSERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
         server-dir: /suliquido-backend
     
