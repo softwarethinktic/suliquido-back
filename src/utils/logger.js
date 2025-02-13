@@ -44,7 +44,7 @@ const prodLogger = () => {
   return createLogger({
     levels: logLevels.levels,
     format: combine(timestamp(), format.errors({ stack: true }), json()),
-    transports: [new transports.Console()],
+    transports: [new transports.Console(), new transports.File({ filename: "file.log" })],
   });
 };
 
