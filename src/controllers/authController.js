@@ -34,6 +34,7 @@ const authController = {
         password: hashedPassword,
         name,
       });
+      logger.info(`Usuario creado: ${user}`);
 
       // Generar token
       const token = jwt.sign(
