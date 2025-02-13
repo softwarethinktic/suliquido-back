@@ -11,13 +11,24 @@ const authController = {
       const { documentNumber, email, password, name } = req.body;
 
       // ¿El usuario existe? validacion
-      const existingUser = await User.findOne({
+      const existingUserDocumentNumber = await User.findOne({
         where: {
-          [Op.or]: [{ email }, { documentNumber }],
+          documentNumber,
         },
       });
 
-      if (existingUser) {
+      const existingUserEmail = await User.findOne({
+        where: {
+          email,
+        },
+      });
+
+      if (existingUserDocumentNumber) {
+        return res.status(400).json({
+          ok: false,
+          msg: "Ya existe un usuario con ese número de documento",
+        });
+      } else if (existingUserEmail) {
         return res.status(400).json({
           ok: false,
           msg: "Ya existe un usuario con ese email",
