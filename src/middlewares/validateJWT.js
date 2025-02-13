@@ -62,7 +62,21 @@ const validateApiToken = (req, res = response, next) => {
   next();
 };
 
+const validateRole = (req, res = response, next) => {
+  const { role } = req;
+
+  if (role !== "admin") {
+    return res.status(401).json({
+      ok: false,
+      msg: "No tienes permisos para realizar esta acción",
+    });
+  }
+
+  next();
+};
+
 module.exports = {
   validateJWT,
   validateApiToken,
+  validateRole,
 };

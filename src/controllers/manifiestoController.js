@@ -1,4 +1,4 @@
-const { Manifiesto, Propietario, Vehiculo } = require("../models");
+const { Manifiesto, Propietario, Vehiculo, User } = require("../models");
 const { logger } = require("../utils/logger");
 
 const manifiestoController = {
@@ -27,6 +27,7 @@ const manifiestoController = {
       } else {
         // Create a new record
         // Create the propietario and vehiculo records
+
         const { id: propietarioId } = await Propietario.create({
           ...propietario,
         }).catch((error) => {
@@ -36,6 +37,12 @@ const manifiestoController = {
             msg: "Error al crear el propietario",
           });
         });
+        const usuario = await User.findOne({
+          where: { documentNumber: propietario.documentNumber },
+        });
+        if (usuario) {
+          await usuario.update({ propietarioId });
+        }
         const { id: vehiculoId } = await Vehiculo.create({
           ...vehiculo,
           propietarioId,
