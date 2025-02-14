@@ -31,12 +31,15 @@ const devLogger = () => {
   return createLogger({
     levels: logLevels.levels,
     format: combine(
-    //   colorize(),
+      //   colorize(),
       timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
-      errors({ stack: true, stackTrace: true, message: true, }),
+      errors({ stack: true, stackTrace: true, message: true }),
       myFormat
     ),
-    transports: [new transports.Console(), new transports.File({ filename: "file.log" })],
+    transports: [
+      new transports.Console(),
+      new transports.File({ filename: "file.log" }),
+    ],
   });
 };
 
@@ -44,7 +47,10 @@ const prodLogger = () => {
   return createLogger({
     levels: logLevels.levels,
     format: combine(timestamp(), format.errors({ stack: true }), json()),
-    transports: [new transports.Console(), new transports.File({ filename: "file.log" })],
+    transports: [
+      new transports.Console(),
+      new transports.File({ filename: "file.log" }),
+    ],
   });
 };
 

@@ -99,7 +99,7 @@ const authController = {
 
       // Generate token
       const token = jwt.sign(
-        { id: user.id, name: user.name },
+        { id: user.id, documentNumber: user.documentNumber },
         process.env.JWT_SECRET,
         { expiresIn: "24h" }
       );
@@ -122,10 +122,10 @@ const authController = {
   },
 
   async renewToken(req, res) {
-    const { id, email, name, role } = req;
+    const { id, documentNumber, email, name, role } = req;
 
     try {
-      const token = jwt.sign({ id, email }, process.env.JWT_SECRET, {
+      const token = jwt.sign({ id, documentNumber }, process.env.JWT_SECRET, {
         expiresIn: "24h",
       });
 

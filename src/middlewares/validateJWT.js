@@ -27,6 +27,7 @@ const validateJWT = async (req, res = response, next) => {
     }
 
     req.id = payload.id;
+    req.documentNumber = user.documentNumber;
     req.email = user.email;
     req.name = user.name;
     req.role = user.role;

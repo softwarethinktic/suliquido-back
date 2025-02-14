@@ -13,7 +13,7 @@ router.post(
   authController.register
 );
 router.post("/login", validateLogin, authController.login);
-// router.post("/renew");
+router.post("/renew", [validateJWT], authController.renewToken);
 // router.post("/forgot-password");
 // router.post("/reset-password");
 
