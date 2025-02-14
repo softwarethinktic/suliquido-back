@@ -135,6 +135,7 @@ const authController = {
         user: {
           id,
           email,
+          documentNumber,
           name,
           role,
         },
