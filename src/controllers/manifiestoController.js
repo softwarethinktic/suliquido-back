@@ -14,11 +14,14 @@ const manifiestoController = {
     try {
       const { numeroManifiesto, propietario, vehiculo, ...data } = req.body;
 
+      const cleanNumeroManifiesto = numeroManifiesto.replace(/-/g, '');
+
       // Check if the record exists
       let manifiesto = await Manifiesto.findOne({
-        where: { numeroManifiesto },
-        transaction,
+      where: { numeroManifiesto: cleanNumeroManifiesto },
+      transaction,
       });
+
 
       if (manifiesto) {
         // Update the existing record
