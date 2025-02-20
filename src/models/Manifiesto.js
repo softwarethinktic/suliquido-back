@@ -52,6 +52,14 @@ module.exports = (sequelize) => {
       type: DataTypes.FLOAT,
       allowNull: false,
     },
+    totalOtrosDescuentos:{
+      type: DataTypes.FLOAT,
+      allowNull: false,
+    },
+    observaciones: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     propietarioId: {
       type: DataTypes.INTEGER,
       allowNull: false,
