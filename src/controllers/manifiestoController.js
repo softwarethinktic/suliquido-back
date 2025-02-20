@@ -1,14 +1,23 @@
-const { Manifiesto, Propietario, Vehiculo, User } = require("../models");
+const {
+  Manifiesto,
+  Propietario,
+  Vehiculo,
+  User,
+  sequelize,
+} = require("../models");
 const { logger } = require("../utils/logger");
 
 const manifiestoController = {
   async createOrUpdate(req, res) {
+    const transaction = await sequelize.transaction();
+
     try {
       const { numeroManifiesto, propietario, vehiculo, ...data } = req.body;
 
       // Check if the record exists
       let manifiesto = await Manifiesto.findOne({
         where: { numeroManifiesto },
+        transaction,
       });
 
       if (manifiesto) {
@@ -18,7 +27,8 @@ const manifiestoController = {
             data[key] = manifiesto[key];
           }
         });
-        await manifiesto.update(data);
+        await manifiesto.update(data, { transaction });
+        await transaction.commit();
         res.json({
           ok: true,
           msg: "Manifiesto actualizado correctamente",
@@ -28,9 +38,12 @@ const manifiestoController = {
         // Create a new record
         // Create the propietario and vehiculo records
 
-        const { id: propietarioId } = await Propietario.create({
-          ...propietario,
-        }).catch((error) => {
+        const { id: propietarioId } = await Propietario.create(
+          {
+            ...propietario,
+          },
+          { transaction }
+        ).catch((error) => {
           logger.error(error);
           res.status(500).json({
             ok: false,
@@ -38,15 +51,19 @@ const manifiestoController = {
           });
         });
         const usuario = await User.findOne({
-          where: { documentNumber: propietario.documentNumber },
+          where: { documentNumber: propietario.numeroDocumento },
+          transaction,
         });
         if (usuario) {
-          await usuario.update({ propietarioId });
+          await usuario.update({ propietarioId }, { transaction });
         }
-        const { id: vehiculoId } = await Vehiculo.create({
-          ...vehiculo,
-          propietarioId,
-        }).catch((error) => {
+        const { id: vehiculoId } = await Vehiculo.create(
+          {
+            ...vehiculo,
+            propietarioId,
+          },
+          { transaction }
+        ).catch((error) => {
           logger.error(error);
           res.status(500).json({
             ok: false,
@@ -54,12 +71,16 @@ const manifiestoController = {
           });
         });
 
-        manifiesto = await Manifiesto.create({
-          numeroManifiesto,
-          propietarioId,
-          vehiculoId,
-          ...data,
-        });
+        manifiesto = await Manifiesto.create(
+          {
+            numeroManifiesto,
+            propietarioId,
+            vehiculoId,
+            ...data,
+          },
+          { transaction }
+        );
+        await transaction.commit();
         res.status(201).json({
           ok: true,
           msg: "Manifiesto creado correctamente",
@@ -67,6 +88,7 @@ const manifiestoController = {
         });
       }
     } catch (error) {
+      await transaction.rollback();
       logger.error(error);
       res.status(500).json({
         ok: false,

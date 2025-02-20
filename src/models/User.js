@@ -36,5 +36,13 @@ module.exports = (sequelize) => {
     lastLogin: {
       type: DataTypes.DATE,
     },
+    propietarioId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "Propietarios",
+        key: "id",
+      },
+    },
   });
 };

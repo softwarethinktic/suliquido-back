@@ -7,7 +7,9 @@ const { Op } = require("sequelize");
 
 const authController = {
   async register(req, res) {
+    const transaction = await sequelize.transaction();
     try {
+      console.log(process.env.JWT_SECRET);
       const { documentNumber, email, password, name } = req.body;
 
       // ¿El usuario existe? validacion
@@ -34,6 +36,11 @@ const authController = {
           msg: "Ya existe un usuario con ese email",
         });
       }
+      // Check if the Propietario exists
+      const existingPropietario = await Propietario.findOne({
+        where: { numeroDocumento: documentNumber },
+        transaction,
+      });
 
       // Hash password por seguridad
       const hashedPassword = await bcrypt.hash(password, 10);
@@ -46,14 +53,20 @@ const authController = {
         name,
       });
 
+      if (existingPropietario) {
+        await user.update(
+          { propietarioId: existingPropietario.id },
+          { transaction }
+        );
+      }
+
+      await transaction.commit();
       // Generar token
       const token = jwt.sign(
         { id: user.id, documentNumber: user.documentNumber },
         process.env.JWT_SECRET,
         { expiresIn: "24h" }
       );
-
-      //   await emailService.sendWelcomeEmail(user.email, user.name);
 
       res.status(201).json({
         ok: true,
@@ -67,6 +80,7 @@ const authController = {
         },
       });
     } catch (error) {
+      await transaction.rollback();
       logger.error(error);
     }
   },
