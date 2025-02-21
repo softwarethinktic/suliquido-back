@@ -12,6 +12,10 @@ module.exports = (sequelize) => {
       unique: true,
       allowNull: false,
     },
+    tipoMfto: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     fecha: {
       type: DataTypes.DATE,
       allowNull: false,
@@ -22,10 +26,6 @@ module.exports = (sequelize) => {
     },
     ruta: {
       type: DataTypes.STRING,
-      allowNull: false,
-    },
-    valorTons: {
-      type: DataTypes.FLOAT,
       allowNull: false,
     },
     producto: {
@@ -39,22 +39,32 @@ module.exports = (sequelize) => {
     valorFlete: {
       type: DataTypes.FLOAT,
       allowNull: false,
+      defaultValue: 0,
+    },
+    valorTons:{
+      type: DataTypes.FLOAT,
+      allowNull: false,
+      defaultValue: 0,
     },
     anticipos: {
       type: DataTypes.FLOAT,
       allowNull: false,
+      defaultValue: 0,
     },
     reteFte: {
       type: DataTypes.FLOAT,
       allowNull: false,
+      defaultValue: 0,
     },
     totalLiquidacion: {
       type: DataTypes.FLOAT,
       allowNull: false,
+      defaultValue: 0
     },
-    totalOtrosDescuentos:{
+    totalOtrosDescuentos: {
       type: DataTypes.FLOAT,
       allowNull: false,
+      defaultValue: 0
     },
     observaciones: {
       type: DataTypes.STRING,

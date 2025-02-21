@@ -18,15 +18,15 @@ module.exports = (sequelize) => {
     },
     direccion: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     ciudad: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     telefono: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
   });
 };
