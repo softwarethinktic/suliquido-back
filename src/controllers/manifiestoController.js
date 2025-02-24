@@ -1,4 +1,4 @@
-const { Op } = require("sequelize");
+const { Op, Sequelize } = require("sequelize");
 const {
   Manifiesto,
   Propietario,
@@ -113,9 +113,10 @@ const manifiestoController = {
 
     if (productName) {
       whereClause[Op.or] = [
-        { producto: { nombreProducto: productName } },
-        { producto: { [Op.contains]: [{ nombreProducto: productName }] } },
+        Sequelize.literal(`JSON_SEARCH(producto, 'one', '%${productName}%', null, '$[*].nombreProducto') IS NOT NULL`),
+        Sequelize.literal(`JSON_UNQUOTE(JSON_EXTRACT(producto, '$.nombreProducto')) LIKE '%${productName}%'`),
       ];
+
     }
 
     const orderClause = [];
@@ -123,7 +124,7 @@ const manifiestoController = {
       orderClause.push([sortField, sortOrder.toUpperCase()]);
     }
 
-    const numeroDocumento = req.documentNumber;
+    const numeroDocumento = req.query.numeroDocumento; // Ensure this is coming from req.query
     try {
       const manifiestos = await Manifiesto.findAll({
         where: whereClause,
@@ -152,10 +153,7 @@ const manifiestoController = {
       });
     } catch (error) {
       logger.error(error);
-      return res.status(500).json({
-        ok: false,
-        msg: "Error al consultar los manifiestos",
-      });
+      return res.status(500).json({ error: error.message });
     }
   },
 };
