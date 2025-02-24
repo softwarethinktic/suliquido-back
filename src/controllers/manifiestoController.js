@@ -95,7 +95,6 @@ const manifiestoController = {
       placa,
       fecha,
       productName,
-      numeroDocumento,
       limit,
       offset,
       sortField,
@@ -114,8 +113,8 @@ const manifiestoController = {
 
     if (productName) {
       whereClause[Op.or] = [
-        { producto: { name: productName } },
-        { producto: { [Op.contains]: [{ name: productName }] } },
+        { producto: { nombreProducto: productName } },
+        { producto: { [Op.contains]: [{ nombreProducto: productName }] } },
       ];
     }
 
@@ -124,6 +123,7 @@ const manifiestoController = {
       orderClause.push([sortField, sortOrder.toUpperCase()]);
     }
 
+    const numeroDocumento = req.documentNumber;
     try {
       const manifiestos = await Manifiesto.findAll({
         where: whereClause,
@@ -137,8 +137,8 @@ const manifiestoController = {
           {
             model: Propietario,
             as: "propietario",
-            where: numeroDocumento ? { numeroDocumento } : {},
-            required: !!numeroDocumento,
+            where: numeroDocumento,
+            required: true,
           },
         ],
         limit: limit ? parseInt(limit) : 10,
