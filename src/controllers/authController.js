@@ -9,7 +9,6 @@ const authController = {
   async register(req, res) {
     const transaction = await sequelize.transaction();
     try {
-      console.log(process.env.JWT_SECRET);
       const { documentNumber, email, password, name } = req.body;
 
       // ¿El usuario existe? validacion

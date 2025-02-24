@@ -7,7 +7,7 @@ function setRoutes(app) {
   app.use("/api/v1/auth", authLimiter, authRoutes);
   app.use(
     "/api/v1/manifiesto",
-    [generalLimiter, validateApiToken],
+    [generalLimiter],
     manifiestoRoutes
   );
 

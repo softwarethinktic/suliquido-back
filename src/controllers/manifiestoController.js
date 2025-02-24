@@ -1,3 +1,4 @@
+const { Op } = require("sequelize");
 const {
   Manifiesto,
   Propietario,
@@ -85,6 +86,75 @@ const manifiestoController = {
       return res.status(500).json({
         ok: false,
         msg: "Error al crear o actualizar el manifiesto",
+      });
+    }
+  },
+  async queryManifiestos(req, res) {
+    const {
+      numeroManifiesto,
+      placa,
+      fecha,
+      productName,
+      numeroDocumento,
+      limit,
+      offset,
+      sortField,
+      sortOrder,
+    } = req.query;
+
+    const whereClause = {};
+
+    if (numeroManifiesto) {
+      whereClause.numeroManifiesto = numeroManifiesto;
+    }
+
+    if (fecha) {
+      whereClause.fecha = fecha;
+    }
+
+    if (productName) {
+      whereClause[Op.or] = [
+        { producto: { name: productName } },
+        { producto: { [Op.contains]: [{ name: productName }] } },
+      ];
+    }
+
+    const orderClause = [];
+    if (sortField && sortOrder) {
+      orderClause.push([sortField, sortOrder.toUpperCase()]);
+    }
+
+    try {
+      const manifiestos = await Manifiesto.findAll({
+        where: whereClause,
+        include: [
+          {
+            model: Vehiculo,
+            as: "vehiculo",
+            where: placa ? { placa } : {},
+            required: !!placa,
+          },
+          {
+            model: Propietario,
+            as: "propietario",
+            where: numeroDocumento ? { numeroDocumento } : {},
+            required: !!numeroDocumento,
+          },
+        ],
+        limit: limit ? parseInt(limit) : 10,
+        offset: offset ? parseInt(offset) : 0,
+        order: orderClause.length ? orderClause : undefined,
+      });
+
+      return res.json({
+        ok: true,
+        manifiestos,
+      });
+    } catch (error) {
+      logger.error(error);
+      return res.status(500).json({
+        ok: false,
+        msg: "Error al consultar los manifiestos",
       });
     }
   },
