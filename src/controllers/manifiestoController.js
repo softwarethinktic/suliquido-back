@@ -115,8 +115,9 @@ const manifiestoController = {
     }
 
     if (fecha) {
-      whereClause[Op.and] = Sequelize.literal(`DATE_FORMAT(fecha, '%Y-%m-%d') = '${fecha}'`);
-
+      whereClause[Op.and] = Sequelize.literal(
+        `DATE_FORMAT(fecha, '%Y-%m-%d') = '${fecha}'`
+      );
     }
 
     if (productName) {
@@ -140,10 +141,18 @@ const manifiestoController = {
         'Ú', 'U'
       )
     `;
-    whereClause[Op.or] = [
-      Sequelize.literal(`${replaceAccents("JSON_UNQUOTE(JSON_EXTRACT(producto, '$.nombreProducto'))")} LIKE '%${removedAccentsProductName}%'`),
-      Sequelize.literal(`${replaceAccents("JSON_UNQUOTE(JSON_EXTRACT(producto, '$[*].nombreProducto'))")} LIKE '%${removedAccentsProductName}%'`)
-    ];
+      whereClause[Op.or] = [
+        Sequelize.literal(
+          `${replaceAccents(
+            "JSON_UNQUOTE(JSON_EXTRACT(producto, '$.nombreProducto'))"
+          )} LIKE '%${removedAccentsProductName}%'`
+        ),
+        Sequelize.literal(
+          `${replaceAccents(
+            "JSON_UNQUOTE(JSON_EXTRACT(producto, '$[*].nombreProducto'))"
+          )} LIKE '%${removedAccentsProductName}%'`
+        ),
+      ];
     }
 
     const orderClause = [];
