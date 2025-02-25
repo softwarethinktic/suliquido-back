@@ -108,7 +108,8 @@ const manifiestoController = {
     }
 
     if (fecha) {
-      whereClause.fecha = fecha;
+      whereClause[Op.and] = Sequelize.literal(`DATE_FORMAT(fecha, '%Y-%m-%d') = '${fecha}'`);
+
     }
 
     if (productName) {
@@ -124,7 +125,7 @@ const manifiestoController = {
       orderClause.push([sortField, sortOrder.toUpperCase()]);
     }
 
-    const numeroDocumento = req.query.numeroDocumento; // Ensure this is coming from req.query
+    const numeroDocumento = req.documentNumber; // Ensure this is coming from req.query
     try {
       const manifiestos = await Manifiesto.findAll({
         where: whereClause,
@@ -138,8 +139,8 @@ const manifiestoController = {
           {
             model: Propietario,
             as: "propietario",
-            where: numeroDocumento,
-            required: true,
+            where: numeroDocumento ? { numeroDocumento } : {},
+            required: !!numeroDocumento,
           },
         ],
         limit: limit ? parseInt(limit) : 10,
