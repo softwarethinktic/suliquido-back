@@ -8,6 +8,13 @@ const {
 } = require("../models");
 const { logger } = require("../utils/logger");
 
+const removeAccents = (str) => {
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase();
+};
+
 const manifiestoController = {
   async createOrUpdate(req, res) {
     const transaction = await sequelize.transaction();
@@ -113,11 +120,30 @@ const manifiestoController = {
     }
 
     if (productName) {
-      whereClause[Op.or] = [
-        Sequelize.literal(`JSON_SEARCH(producto, 'one', '%${productName}%', null, '$[*].nombreProducto') IS NOT NULL`),
-        Sequelize.literal(`JSON_UNQUOTE(JSON_EXTRACT(producto, '$.nombreProducto')) LIKE '%${productName}%'`),
-      ];
-
+      const upperProductName = productName.toUpperCase();
+      const removedAccentsProductName = removeAccents(upperProductName);
+      const replaceAccents = (field) => `
+      REPLACE(
+        REPLACE(
+          REPLACE(
+            REPLACE(
+              REPLACE(
+                UPPER(${field}),
+                'Á', 'A'
+              ),
+              'É', 'E'
+            ),
+            'Í', 'I'
+          ),
+          'Ó', 'O'
+        ),
+        'Ú', 'U'
+      )
+    `;
+    whereClause[Op.or] = [
+      Sequelize.literal(`${replaceAccents("JSON_UNQUOTE(JSON_EXTRACT(producto, '$.nombreProducto'))")} LIKE '%${removedAccentsProductName}%'`),
+      Sequelize.literal(`${replaceAccents("JSON_UNQUOTE(JSON_EXTRACT(producto, '$[*].nombreProducto'))")} LIKE '%${removedAccentsProductName}%'`)
+    ];
     }
 
     const orderClause = [];
