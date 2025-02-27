@@ -8,19 +8,22 @@ const {
 } = require("../models");
 const { logger } = require("../utils/logger");
 
-const removeAccents = (str) => {
-  return str
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toUpperCase();
-};
-
 const manifiestoController = {
   async createOrUpdate(req, res) {
     const transaction = await sequelize.transaction();
 
     try {
-      const { numeroManifiesto, propietario, vehiculo, ...data } = req.body;
+      const { numeroManifiesto, propietario, vehiculo, ...data } = trimValues(
+        req.body
+      );
+
+      data.descuentos = trimValues(data.descuentos);
+
+      if (data?.producto?.length > 0) {
+        data.producto = data.producto.map((producto) => trimValues(producto));
+      } else {
+        data.producto = trimValues(data.producto);
+      }
 
       const cleanNumeroManifiesto = numeroManifiesto.replace(/-/g, "");
 
@@ -102,11 +105,12 @@ const manifiestoController = {
       placa,
       fecha,
       productName,
-      limit,
-      offset,
+      page,
+      size,
       sortField,
       sortOrder,
     } = req.query;
+    const { limit, offset } = getPagination(page, size);
 
     const whereClause = {};
 
@@ -162,7 +166,7 @@ const manifiestoController = {
 
     const numeroDocumento = req.documentNumber; // Ensure this is coming from req.query
     try {
-      const manifiestos = await Manifiesto.findAll({
+      const manifiestos = await Manifiesto.findAndCountAll({
         where: whereClause,
         include: [
           {
@@ -183,13 +187,15 @@ const manifiestoController = {
         order: orderClause.length ? orderClause : undefined,
       });
 
+      const response = getPagingData(manifiestos, page, limit);
+
       return res.json({
         ok: true,
-        manifiestos,
+        response,
       });
     } catch (error) {
       logger.error(error);
-      return res.status(500).json({ error: error.message });
+      return res.status(500).json({ ok: false, msg: error.message });
     }
   },
 };
@@ -203,7 +209,7 @@ const createOrUpdatePropietario = async (propietario, transaction) => {
     await propietarioDb
       .update(
         {
-          ...propietario,
+          ...trimValues(propietario),
         },
         { transaction }
       )
@@ -220,7 +226,7 @@ const createOrUpdatePropietario = async (propietario, transaction) => {
   } else {
     const { id } = await Propietario.create(
       {
-        ...propietario,
+        ...trimValues(propietario),
       },
       { transaction }
     ).catch(async (error) => {
@@ -252,7 +258,7 @@ const createOrUpdateVehicle = async (vehiculo, propietarioId, transaction) => {
     await vehiculoDb
       .update(
         {
-          ...vehiculo,
+          ...trimValues(vehiculo),
           propietarioId,
         },
         { transaction }
@@ -269,7 +275,7 @@ const createOrUpdateVehicle = async (vehiculo, propietarioId, transaction) => {
   } else {
     const { id } = await Vehiculo.create(
       {
-        ...vehiculo,
+        ...trimValues(vehiculo),
         propietarioId,
       },
       { transaction }
@@ -285,6 +291,40 @@ const createOrUpdateVehicle = async (vehiculo, propietarioId, transaction) => {
 
     return id;
   }
+};
+
+const removeAccents = (str) => {
+  return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase();
+};
+
+const trimValues = (obj) => {
+  const trimmedObj = {};
+  for (const key in obj) {
+    if (typeof obj[key] === "string") {
+      trimmedObj[key] = obj[key].trim();
+    } else {
+      trimmedObj[key] = obj[key];
+    }
+  }
+  return trimmedObj;
+};
+
+const getPagination = (page, size) => {
+  const limit = size ? +size : 5;
+  const offset = page ? page * limit : 0;
+
+  return { limit, offset };
+};
+
+const getPagingData = (data, page, limit) => {
+  const { count: totalItems, rows: manifiestos } = data;
+  const currentPage = page ? +page : 0;
+  const totalPages = Math.ceil(totalItems / limit);
+
+  return { totalItems, manifiestos, totalPages, currentPage, pageSize: limit };
 };
 
 module.exports = manifiestoController;
