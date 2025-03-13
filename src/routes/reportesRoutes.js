@@ -8,6 +8,12 @@ router.get(
   [validateJWT],
   reportesController.generarLiquidaciónManifiestto
 );
+
+router.get(
+  "/enviar-liquidacion/:idManifiesto",
+  [validateJWT],
+  reportesController.sendLiquidacionManifiestoEmail
+);
 router.get(
   "/generar-estado-cuenta",
   [validateJWT],
