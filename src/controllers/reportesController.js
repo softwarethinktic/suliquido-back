@@ -4,6 +4,8 @@ const {
   generarPDFLiquidacion,
   generarPDFEstadoDeCuenta,
 } = require("../services/generarReportes");
+const emailService = require("../services/emailService");
+const { logger } = require("../utils/logger");
 
 const reportesController = {
   async generarLiquidaciónManifiestto(req, res) {
@@ -22,6 +24,37 @@ const reportesController = {
     const pdf = await generarPDFLiquidacion(manifiesto);
 
     res.send(pdf);
+  },
+  async sendLiquidacionManifiestoEmail(req, res) {
+    const { idManifiesto } = req.params;
+    const email = req.email;
+
+    const manifiesto = await Manifiesto.findOne({
+      where: { id: idManifiesto },
+      include: [{ association: "propietario" }, { association: "vehiculo" }],
+    });
+
+    const numeroManifiesto = manifiesto.numeroManifiesto.slice(3);
+
+    const pdf = await generarPDFLiquidacion(manifiesto);
+
+    try {
+      await emailService.sendManifiestoLiquidacionEmail(
+        pdf,
+        email,
+        numeroManifiesto
+      );
+
+      return res.status(200).json({
+        ok: true,
+        msg: "Correo electrónico enviado correctamente",
+      });
+    } catch (error) {
+      logger.error(error);
+      return res
+        .status(500)
+        .json({ ok: false, msg: "Error al enviar el correo electrónico" });
+    }
   },
   async generarEstadoDeCuenta(req, res) {
     const { placas, fechaInicial, fechaFinal } = req.query;

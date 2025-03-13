@@ -12,6 +12,7 @@ const User = require("./User")(sequelize);
 const Manifiesto = require("./Manifiesto")(sequelize);
 const Vehiculo = require("./Vehiculo")(sequelize);
 const Propietario = require("./Propietario")(sequelize);
+const OTP = require("./OTP")(sequelize);
 
 
 Propietario.hasMany(Manifiesto, { foreignKey: 'propietarioId', as: 'manifiestos' });
@@ -28,5 +29,6 @@ module.exports = {
   Manifiesto,
   Vehiculo,
   Propietario,
-  sequelize
+  sequelize,
+  OTP
 };

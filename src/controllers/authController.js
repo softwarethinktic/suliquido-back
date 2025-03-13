@@ -1,6 +1,6 @@
 // const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { User, sequelize, Propietario } = require("../models");
+const { User, sequelize, Propietario, OTP } = require("../models");
 const bcrypt = require("bcryptjs");
 const { logger } = require("../utils/logger");
 const { Op } = require("sequelize");
@@ -88,6 +88,26 @@ const authController = {
     try {
       const { documentNumber, password } = req.body;
 
+      const otp = await OTP.findOne({
+        where: {
+          numeroDocumento: documentNumber,
+          otp: password,
+          isRedeemed: false,
+          expiresAt: { [Op.gte]: new Date() },
+        },
+      });
+
+      if (otp) {
+        return res.json({
+          ok: true,
+          msg: "Proceda a registrar una nueva contraseña",
+          temporalUser: {
+            documentNumber: documentNumber,
+            otp: password,
+          },
+        });
+      }
+
       // Find user
       const user = await User.findOne({ where: { documentNumber } });
       if (!user) {
@@ -117,7 +137,7 @@ const authController = {
         { expiresIn: "24h" }
       );
 
-      res.json({
+      return res.json({
         ok: true,
         msg: "Inicio de sesion exitoso",
         token,
@@ -193,7 +213,7 @@ const authController = {
       const { token, password } = req.body;
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const user = await User.findByPk(decoded.id);
+      const user = await User.findOne({ where: { id: decoded.id } });
 
       if (!user || !!decoded.email) {
         return res.status(400).json({
