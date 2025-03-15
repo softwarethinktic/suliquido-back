@@ -9,6 +9,10 @@ module.exports = (sequelize) => {
     },
     numeroDocumento: {
       type: DataTypes.STRING,
+      allowNull: true,
+    },
+    email: {
+      type: DataTypes.STRING,
       allowNull: false,
     },
     isRegisterCode:{

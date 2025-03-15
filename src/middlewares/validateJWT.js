@@ -69,6 +69,10 @@ const validateOTPRegister = async (req, res = response, next) => {
         msg: "Código OTP no válido",
       });
     }
+    req.body.email = otp.email;
+    if (otp.numeroDocumento) {
+      req.body.documentNumber = otp.numeroDocumento;
+    }
   } catch (error) {
     logger.error(error);
     return res.status(500).json({

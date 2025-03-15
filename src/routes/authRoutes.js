@@ -5,11 +5,11 @@ const {
   validateRegister,
   validateLogin,
 } = require("../middlewares/validateFields");
-const { validateJWT, validateRole } = require("../middlewares/validateJWT");
+const { validateJWT, validateOTPRegister } = require("../middlewares/validateJWT");
 
 router.post(
   "/register",
-  [validateJWT, validateRole, validateRegister],
+  [validateOTPRegister, validateRegister],
   authController.register
 );
 router.post("/login", validateLogin, authController.login);

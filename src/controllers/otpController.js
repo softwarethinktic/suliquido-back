@@ -1,5 +1,5 @@
 const otpGenerator = require("otp-generator");
-const { sequelize, OTP } = require("../models");
+const { sequelize, OTP, User } = require("../models");
 const emailService = require("../services/emailService");
 const { logger } = require("../utils/logger");
 const { Op } = require("sequelize");
@@ -10,18 +10,44 @@ const otpController = {
     try {
       const { email, documentNumber } = req.body;
 
+      // ¿El usuario existe? validacion
+      const existingUserDocumentNumber = await User.findOne({
+        where: {
+          documentNumber,
+        },
+      });
+
+      const existingUserEmail = await User.findOne({
+        where: {
+          email,
+        },
+      });
+
+      if (existingUserDocumentNumber) {
+        return res.status(400).json({
+          ok: false,
+          msg: "Ya existe un usuario con ese número de documento",
+        });
+      } else if (existingUserEmail) {
+        return res.status(400).json({
+          ok: false,
+          msg: "Ya existe un usuario con ese email",
+        });
+      }
+
       const otp = otpGenerator.generate(200, {
         upperCaseAlphabets: true,
         specialChars: false,
       });
 
-      deleteInvalidOtps();
+      await deleteInvalidOtps();
 
       await OTP.create(
         {
           numeroDocumento: documentNumber,
           otp: otp,
           isRegisterCode: true,
+          email,
           // Set expiration time to 1 day from now
           expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
         },

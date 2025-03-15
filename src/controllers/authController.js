@@ -11,12 +11,12 @@ const authController = {
   async register(req, res) {
     const transaction = await sequelize.transaction();
     try {
-      const { documentNumber, email, password, name } = req.body;
+      const { password, name, documentNumber, email } = req.body;
 
       // ¿El usuario existe? validacion
       const existingUserDocumentNumber = await User.findOne({
         where: {
-          documentNumber,
+          documentNumber
         },
       });
 
