@@ -23,7 +23,7 @@ const otpController = {
           otp: otp,
           isRegisterCode: true,
           // Set expiration time to 1 day from now
-          expiration: new Date(Date.now() + 24 * 60 * 60 * 1000),
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
         },
         {
           transaction,
