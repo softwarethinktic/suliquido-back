@@ -1,7 +1,8 @@
 const { response } = require("express");
 const jwt = require("jsonwebtoken");
-const { User } = require("../models");
+const { User, OTP } = require("../models");
 const { logger } = require("../utils/logger");
+const { Op } = require("sequelize");
 
 const validateJWT = async (req, res = response, next) => {
   // x-token headers
@@ -36,6 +37,43 @@ const validateJWT = async (req, res = response, next) => {
     return res.status(401).json({
       ok: false,
       msg: "Token no válido",
+    });
+  }
+
+  next();
+};
+
+const validateOTPRegister = async (req, res = response, next) => {
+  const otpCode = req?.header("otp-code");
+
+  if (!otpCode) {
+    return res.status(400).json({
+      ok: false,
+      msg: "No hay código OTP en la petición",
+    });
+  }
+
+  try {
+    const otp = await OTP.findOne({
+      where: {
+        otp: otpCode,
+        isRegisterCode: true,
+        isRedeemed: false,
+        expiresAt: { [Op.gte]: new Date() },
+      },
+    });
+
+    if (!otp) {
+      return res.status(400).json({
+        ok: false,
+        msg: "Código OTP no válido",
+      });
+    }
+  } catch (error) {
+    logger.error(error);
+    return res.status(500).json({
+      ok: false,
+      msg: "Error al validar el código OTP",
     });
   }
 
@@ -77,6 +115,7 @@ const validateRole = (req, res = response, next) => {
 };
 
 module.exports = {
+  validateOTPRegister,
   validateJWT,
   validateApiToken,
   validateRole,

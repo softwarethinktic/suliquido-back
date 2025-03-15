@@ -4,6 +4,8 @@ const { User, sequelize, Propietario, OTP } = require("../models");
 const bcrypt = require("bcryptjs");
 const { logger } = require("../utils/logger");
 const { Op } = require("sequelize");
+const otpGenerator = require("otp-generator");
+const emailService = require("../services/emailService");
 
 const authController = {
   async register(req, res) {
@@ -87,26 +89,6 @@ const authController = {
   async login(req, res) {
     try {
       const { documentNumber, password } = req.body;
-
-      const otp = await OTP.findOne({
-        where: {
-          numeroDocumento: documentNumber,
-          otp: password,
-          isRedeemed: false,
-          expiresAt: { [Op.gte]: new Date() },
-        },
-      });
-
-      if (otp) {
-        return res.json({
-          ok: true,
-          msg: "Proceda a registrar una nueva contraseña",
-          temporalUser: {
-            documentNumber: documentNumber,
-            otp: password,
-          },
-        });
-      }
 
       // Find user
       const user = await User.findOne({ where: { documentNumber } });

@@ -70,6 +70,23 @@ const emailService = {
   //       throw error;
   //     }
   //   },
+  async sendRegistrationLink(userEmail, registrationUrl) {
+    try {
+      await transporter.sendMail({
+        from: process.env.SMTP_USER,
+        to: userEmail,
+        subject: "Enlace de registro",
+        html: `
+          <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+        <h2 style="color: #333;">Te invitamos a registrarte en la plataforma Suliquido</h2>
+        <p>Presiona <a href="${registrationUrl}" style="color: #1a73e8;">aquí</a> para completar tu registro. Este enlace expirará en un día.</p>
+          </div>
+        `,
+      });
+    } catch (error) {
+      logger.error("Error sending registration email", error);
+    }
+  },
 
   async sendResetPasswordEmail(userEmail, resetUrl) {
     try {
@@ -83,7 +100,7 @@ const emailService = {
       logger.error("Error sending reset password email", error);
     }
   },
-  async sendTemporalPassword(){
+  async sendTemporalPassword() {
     try {
       await transporter.sendMail({
         from: process.env.SMTP_USER,
@@ -91,11 +108,8 @@ const emailService = {
         subject: "Credenciales temporales",
         html: `<p>Tu contraseña temporal es: ${tempPassword}. Por favor, cámbiala después de iniciar sesión.</p>`,
       });
-
-    } catch (error) {
-      
-    }
-  }
+    } catch (error) {}
+  },
 };
 
 module.exports = emailService;
