@@ -12,7 +12,7 @@ const otpController = {
 
       const otp = otpGenerator.generate(200, {
         upperCaseAlphabets: true,
-        specialChars: true,
+        specialChars: false,
       });
 
       deleteInvalidOtps();
