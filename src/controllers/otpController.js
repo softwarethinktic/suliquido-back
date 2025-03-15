@@ -62,7 +62,6 @@ const otpController = {
       await transaction.commit();
       return res.status(200).json({
         ok: true,
-        otp,
         msg: "Enlace de registro enviado correctamente",
       });
     } catch (error) {
