@@ -12,11 +12,11 @@ const authController = {
     const transaction = await sequelize.transaction();
     try {
       const { password, name, documentNumber, email } = req.body;
-
+      const otp = req.otp;
       // ¿El usuario existe? validacion
       const existingUserDocumentNumber = await User.findOne({
         where: {
-          documentNumber
+          documentNumber,
         },
       });
 
@@ -47,12 +47,24 @@ const authController = {
       const hashedPassword = await bcrypt.hash(password, 10);
 
       // Crear usuario
-      const user = await User.create({
-        documentNumber,
-        email,
-        password: hashedPassword,
-        name,
-      });
+      const user = await User.create(
+        {
+          documentNumber,
+          email,
+          password: hashedPassword,
+          name,
+        },
+        {
+          transaction,
+        }
+      );
+
+      await otp.update(
+        {
+          isRedeemed: true,
+        },
+        { transaction }
+      );
 
       if (existingPropietario) {
         await user.update(

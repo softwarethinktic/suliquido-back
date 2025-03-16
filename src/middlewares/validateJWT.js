@@ -73,6 +73,7 @@ const validateOTPRegister = async (req, res = response, next) => {
     if (otp.numeroDocumento) {
       req.body.documentNumber = otp.numeroDocumento;
     }
+    req.otp = otp;
   } catch (error) {
     logger.error(error);
     return res.status(500).json({
