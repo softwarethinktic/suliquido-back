@@ -35,3 +35,16 @@ exports.validateSendEmail = [
     .withMessage("El número de documento es requerido"),
   handleValidationErrors,
 ];
+
+exports.validateEmail = [
+  param("email").isEmail().withMessage("Email inválido"),
+  handleValidationErrors,
+];
+
+exports.validaAssignPassword = [
+  body("email").isEmail().withMessage("Email inválido"),
+  body("password")
+    .isLength({ min: 6 })
+    .withMessage("La contraseña debe tener al menos 6 caracteres"),
+  handleValidationErrors,
+];

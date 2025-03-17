@@ -3,9 +3,6 @@ const jwt = require("jsonwebtoken");
 const { User, sequelize, Propietario, OTP } = require("../models");
 const bcrypt = require("bcryptjs");
 const { logger } = require("../utils/logger");
-const { Op } = require("sequelize");
-const otpGenerator = require("otp-generator");
-const emailService = require("../services/emailService");
 
 const authController = {
   async register(req, res) {
@@ -95,6 +92,10 @@ const authController = {
     } catch (error) {
       await transaction.rollback();
       logger.error(error);
+      return res.status(500).json({
+        ok: false,
+        msg: "Error al registrar el usuario",
+      });
     }
   },
 
@@ -173,59 +174,42 @@ const authController = {
     }
   },
 
-  async forgotPassword(req, res) {
+  async resetPassword(req, res) {
+    const transaction = await sequelize.transaction();
+
     try {
-      const { email } = req.body;
+      const { email, password } = req.body;
+      const otp = req.otp;
 
       const user = await User.findOne({ where: { email } });
-      if (!user) {
-        return res.status(400).json({
-          ok: false,
-          msg: "No existe un usuario con ese email",
-        });
-      }
 
-      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-        expiresIn: "5m",
-      });
-
-      const resetUrl = `${process.env.FRONTEND_URL}/pages/reset-password.html?token=${token}`;
-
-      //   await emailService.sendResetPasswordEmail(user.email, resetUrl);
-
-      res.json({
-        ok: true,
-        msg: "Email enviado correctamente",
-      });
-    } catch (error) {
-      logger.error(error);
-    }
-  },
-
-  async resetPassword(req, res) {
-    try {
-      const { token, password } = req.body;
-
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const user = await User.findOne({ where: { id: decoded.id } });
-
-      if (!user || !!decoded.email) {
-        return res.status(400).json({
-          ok: false,
-          msg: "Token no válido",
-        });
-      }
+      await otp.update(
+        {
+          isRedeemed: true,
+        },
+        { transaction }
+      );
 
       const hashedPassword = await bcrypt.hash(password, 10);
-      user.password = hashedPassword;
-      await user.save();
+
+      await user.update(
+        {
+          password: hashedPassword,
+        },
+        { transaction }
+      );
 
       res.json({
         ok: true,
         msg: "Contraseña actualizada correctamente",
       });
     } catch (error) {
+      await transaction.rollback();
       logger.error(error);
+      return res.status(500).json({
+        ok: false,
+        msg: "Error al registrar el usuario",
+      });
     }
   },
 };

@@ -4,8 +4,13 @@ const authController = require("../controllers/authController");
 const {
   validateRegister,
   validateLogin,
+  validaAssignPassword,
 } = require("../middlewares/validateFields");
-const { validateJWT, validateOTPRegister } = require("../middlewares/validateJWT");
+const {
+  validateJWT,
+  validateOTPRegister,
+  validateOTPRecoveryPassword,
+} = require("../middlewares/validateJWT");
 
 router.post(
   "/register",
@@ -14,7 +19,10 @@ router.post(
 );
 router.post("/login", validateLogin, authController.login);
 router.post("/renew", [validateJWT], authController.renewToken);
-// router.post("/forgot-password");
-// router.post("/reset-password");
+router.post(
+  "/assign-password",
+  [validaAssignPassword, validateOTPRecoveryPassword],
+  authController.resetPassword
+);
 
 module.exports = router;

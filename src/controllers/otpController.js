@@ -40,8 +40,6 @@ const otpController = {
         specialChars: false,
       });
 
-      await deleteInvalidOtps();
-
       await OTP.create(
         {
           numeroDocumento: documentNumber,
@@ -70,6 +68,56 @@ const otpController = {
       return res.status(500).json({
         ok: false,
         msg: "Error al enviar el enlace de registro",
+      });
+    }
+  },
+  async otpLinkRecovery(req, res) {
+    const transaction = await sequelize.transaction();
+
+    try {
+      const { email } = req.body;
+      const existingUserEmail = await User.findOne({
+        where: {
+          email,
+        },
+      });
+
+      if (existingUserEmail) {
+        return res.status(400).json({
+          ok: false,
+          msg: "No existe un usuario con ese email",
+        });
+      }
+      const otp = otpGenerator.generate(200, {
+        upperCaseAlphabets: true,
+        specialChars: false,
+      });
+
+      await OTP.create(
+        {
+          otp,
+          email,
+          // Set expiration time to 1 day from now
+        },
+        {
+          transaction,
+        }
+      );
+
+      const assignLink = `${process.env.FRONTEND_URL}/auth/assign-password?otp=${otp}`;
+      await emailService.sendResetPasswordEmail(email, assignLink);
+
+      await transaction.commit();
+      return res.status(200).json({
+        ok: true,
+        msg: "Email enviado correctamente",
+      });
+    } catch (error) {
+      await transaction.rollback();
+      logger.error(error);
+      return res.status(500).json({
+        ok: false,
+        msg: "Error al enviar el correo",
       });
     }
   },

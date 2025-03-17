@@ -85,6 +85,46 @@ const validateOTPRegister = async (req, res = response, next) => {
   next();
 };
 
+const validateOTPRecoveryPassword = async (req, res = response, next) => {
+  const otpCode = req?.header("otp-code");
+
+  if (!otpCode) {
+    return res.status(400).json({
+      ok: false,
+      msg: "No hay código OTP en la petición",
+    });
+  }
+
+  try {
+    const otp = await OTP.findOne({
+      where: {
+        otp: otpCode,
+        isRegisterCode: false,
+        isRedeemed: false,
+        expiresAt: { [Op.gte]: new Date() },
+      },
+    });
+
+    if (!otp) {
+      return res.status(400).json({
+        ok: false,
+        msg: "Código OTP no válido",
+      });
+    }
+
+    req.body.email = otp.email;
+    req.otp = otp;
+  } catch (error) {
+    logger.error(error);
+    return res.status(500).json({
+      ok: false,
+      msg: "Error al validar el código OTP",
+    });
+  }
+
+  next();
+}
+
 const validateApiToken = (req, res = response, next) => {
   // x-token headers
   const token = req?.header("x-token");
@@ -121,6 +161,7 @@ const validateRole = (req, res = response, next) => {
 
 module.exports = {
   validateOTPRegister,
+  validateOTPRecoveryPassword,
   validateJWT,
   validateApiToken,
   validateRole,
