@@ -82,7 +82,7 @@ const otpController = {
         },
       });
 
-      if (existingUserEmail) {
+      if (!existingUserEmail) {
         return res.status(400).json({
           ok: false,
           msg: "No existe un usuario con ese email",
