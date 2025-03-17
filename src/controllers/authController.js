@@ -198,6 +198,8 @@ const authController = {
         },
         { transaction }
       );
+      await transaction.commit();
+
 
       res.json({
         ok: true,
