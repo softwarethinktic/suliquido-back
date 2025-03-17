@@ -68,7 +68,7 @@ const reportesController = {
     }
 
     const wherePlacas =
-      placasArray.length > 0 ? { placa: { [Op.in]: placasArray } } : {};
+      placasArray.length > 0 ? { placa: { [Op.in]: placasArray } } : undefined;
 
     const manifiestos = await Manifiesto.findAll({
       where: {
@@ -86,7 +86,7 @@ const reportesController = {
         {
           association: "vehiculo",
           where: {
-            placa: wherePlacas
+            placa: wherePlacas,
           },
         },
       ],
