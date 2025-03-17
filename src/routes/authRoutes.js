@@ -21,7 +21,7 @@ router.post("/login", validateLogin, authController.login);
 router.post("/renew", [validateJWT], authController.renewToken);
 router.post(
   "/assign-password",
-  [validaAssignPassword, validateOTPRecoveryPassword],
+  [validateOTPRecoveryPassword, validaAssignPassword],
   authController.resetPassword
 );
 
