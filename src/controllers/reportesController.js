@@ -25,6 +25,7 @@ const reportesController = {
 
     res.send(pdf);
   },
+
   async sendLiquidacionManifiestoEmail(req, res) {
     const { idManifiesto } = req.params;
     const email = req.email;
@@ -61,7 +62,13 @@ const reportesController = {
 
     const numeroDocumento = req.documentNumber;
 
-    const placasArray = placas.split(",").map((placa) => placa.trim());
+    let placasArray = [];
+    if (placas) {
+      placasArray = placas.split(",").map((placa) => placa.trim());
+    }
+
+    const wherePlacas =
+      placasArray.length > 0 ? { placa: { [Op.in]: placasArray } } : {};
 
     const manifiestos = await Manifiesto.findAll({
       where: {
@@ -79,9 +86,7 @@ const reportesController = {
         {
           association: "vehiculo",
           where: {
-            placa: {
-              [Op.in]: placasArray,
-            },
+            placa: wherePlacas
           },
         },
       ],
