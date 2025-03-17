@@ -97,6 +97,7 @@ const otpController = {
         {
           otp,
           email,
+          expiresAt: new Date(Date.now() + 5 * 60 * 1000),
           // Set expiration time to 1 day from now
         },
         {
