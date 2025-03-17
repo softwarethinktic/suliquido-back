@@ -1,4 +1,4 @@
-const { body, param, validationResult } = require("express-validator");
+const { body, validationResult } = require("express-validator");
 
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
@@ -37,7 +37,7 @@ exports.validateSendEmail = [
 ];
 
 exports.validateEmail = [
-  param("email").isEmail().withMessage("Email inválido"),
+  body("email").isEmail().withMessage("Email inválido"),
   handleValidationErrors,
 ];
 
