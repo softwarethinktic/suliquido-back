@@ -85,9 +85,7 @@ const reportesController = {
         },
         {
           association: "vehiculo",
-          where: {
-            placa: wherePlacas,
-          },
+          where: wherePlacas
         },
       ],
     });
