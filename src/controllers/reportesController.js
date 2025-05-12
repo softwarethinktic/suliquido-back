@@ -85,7 +85,7 @@ const reportesController = {
         },
         {
           association: "vehiculo",
-          where: wherePlacas
+          where: wherePlacas,
         },
       ],
     });
@@ -111,11 +111,7 @@ const reportesController = {
         },
         {
           association: "vehiculo",
-          where: {
-            placa: {
-              [Op.in]: placasArray,
-            },
-          },
+          where: wherePlacas,
         },
       ],
       raw: true,
@@ -125,7 +121,11 @@ const reportesController = {
     }
     const propietario = manifiestos[0].propietario;
     const manifiestosEstadoDeCuenta = manifiestos.map((manifiesto) => {
-      const manifiestoRutaSplitted = manifiesto.ruta.split("-");
+      const manifiestoRutaSplitted = manifiesto.ruta.includes("-")
+        ? manifiesto.ruta.split("-")
+        : manifiesto.ruta.length > 4
+        ? [manifiesto.ruta.slice(0, 4), manifiesto.ruta.slice(5)]
+        : manifiesto.ruta;
       const formattedDate = new Date(manifiesto.fecha)
         .toLocaleDateString("es-ES", {
           day: "2-digit",
@@ -135,16 +135,18 @@ const reportesController = {
         .replace(/\//g, "-");
       return {
         ageMfto:
-          manifiesto.numeroManifiesto.slice(0, 3) +
+          manifiesto.numeroManifiesto?.slice(0, 3) +
           "-" +
-          manifiesto.numeroManifiesto.slice(3),
+          manifiesto.numeroManifiesto?.slice(3),
         tipMfto: manifiesto.tipoMfto,
         fecha: formattedDate,
         estado: manifiesto.estado,
         ruta:
-          manifiestoRutaSplitted[0].slice(0, 5) +
-          "-" +
-          manifiestoRutaSplitted[1].slice(0, 5),
+          typeof manifiestoRutaSplitted === "string"
+            ? manifiestoRutaSplitted
+            : manifiestoRutaSplitted[0]?.slice(0, 5) +
+              "-" +
+              manifiestoRutaSplitted[1]?.slice(0, 5),
         placa: manifiesto.vehiculo.placa,
         tipoVeh: manifiesto.vehiculo.tipo,
         fleteCon: manifiesto.valorFlete,

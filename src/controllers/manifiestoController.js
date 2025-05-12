@@ -112,7 +112,11 @@ const manifiestoController = {
     } = req.query;
     const { limit, offset } = getPagination(page, size);
 
-    const whereClause = {};
+    const whereClause = {
+      estado: {
+        [Op.in]: ["CUMPLIDA", "LIQUIDADA"],
+      },
+    };
 
     if (numeroManifiesto) {
       whereClause.numeroManifiesto = numeroManifiesto;
