@@ -65,7 +65,10 @@ const authController = {
 
       if (existingPropietario) {
         await user.update(
-          { propietarioId: existingPropietario.id },
+          {
+            propietarioId: existingPropietario.id,
+            email: existingPropietario.correo,
+          },
           { transaction }
         );
       }
@@ -199,7 +202,6 @@ const authController = {
         { transaction }
       );
       await transaction.commit();
-
 
       res.json({
         ok: true,

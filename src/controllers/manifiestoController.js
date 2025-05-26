@@ -3,10 +3,12 @@ const {
   Manifiesto,
   Propietario,
   Vehiculo,
+  OTP,
   User,
   sequelize,
 } = require("../models");
 const { logger } = require("../utils/logger");
+const emailService = require("../services/emailService");
 
 const manifiestoController = {
   async createOrUpdate(req, res) {
@@ -67,6 +69,33 @@ const manifiestoController = {
           propietario,
           transaction
         );
+        // Get the correo and send the registration link
+        const usuario = await User.findOne({
+          where: { documentNumber: propietario.numeroDocumento },
+        });
+        if (!usuario && propietario.correo) {
+          const otp = otpGenerator.generate(200, {
+            upperCaseAlphabets: true,
+            specialChars: false,
+          });
+
+          await OTP.create(
+            {
+              numeroDocumento: propietario.numeroDocumento,
+              otp,
+              isRegisterCode: true,
+              email: propietario.correo,
+              // Set expiration time to 1 day from now
+              expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+            },
+            {
+              transaction,
+            }
+          );
+
+          const registrationLink = `${process.env.FRONTEND_URL}/auth/register?otp=${otp}`;
+          await emailService.sendRegistrationLink(email, registrationLink);
+        }
 
         // Create or update the vehiculo
         const vehiculoId = await createOrUpdateVehicle(
@@ -246,7 +275,7 @@ const createOrUpdatePropietario = async (propietario, transaction) => {
       where: { documentNumber: propietario.numeroDocumento },
     });
     if (usuario) {
-      await usuario.update({ id }, { transaction });
+      await usuario.update({ id, email: propietario.correo }, { transaction });
     }
     return id;
   }

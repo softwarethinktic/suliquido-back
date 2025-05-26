@@ -31,6 +31,10 @@ module.exports = (sequelize) => {
     celular: {
       type: DataTypes.STRING,
       allowNull: true,
+    },
+    correo:{
+      type: DataTypes.STRING,
+      allowNull: true,
     }
   });
 };
